@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace phuongaz\giftcode\components\form;
 
 use dktapps\pmforms\element\Dropdown;
+use dktapps\pmforms\element\Label;
 use Generator;
 use faz\common\form\AsyncForm;
 use phuongaz\giftcode\components\code\CodePool;
@@ -22,7 +23,7 @@ class Give extends AsyncForm {
         $codes = array_map(fn($code) => $code->getCode(), CodePool::getCodes());
         if(count($codes) === 0) {
             return yield $this->custom("GiftCodes", [
-                "§cNão há códigos disponíveis."
+                new Label("code", "Não há códigos disponíveis.")
             ]);
         }
 
