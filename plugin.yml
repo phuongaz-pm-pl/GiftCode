@@ -1,0 +1,18 @@
+name: GiftCode
+main: phuongaz\giftcode\Loader
+api: 5.0.0
+version: 1.0.0
+
+permissions:
+  giftcode.command:
+    description: 'Permission GiftCode'
+    default: true
+  giftcode.command.give:
+    description: 'Permission GiftCode'
+    default: op
+  giftcode.command.list:
+    description: 'Permission GiftCode'
+    default: true
+  giftcode.command.create:
+    description: 'Permission GiftCode'
+    default: op
