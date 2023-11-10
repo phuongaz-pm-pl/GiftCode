@@ -20,6 +20,12 @@ class Give extends AsyncForm {
 
     public function main(): Generator {
         $codes = array_map(fn($code) => $code->getCode(), CodePool::getCodes());
+        if(count($codes) === 0) {
+            return yield $this->custom("GiftCodes", [
+                "§cNão há códigos disponíveis."
+            ]);
+        }
+
         $onlinePlayers = array_map(fn($player) => $player->getName(), Server::getInstance()->getOnlinePlayers());
         $elements = [
             new Dropdown("codeIndex", "Codes", $codes),
