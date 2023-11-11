@@ -30,7 +30,7 @@ class Create extends AsyncForm {
             new Input("code", "Code", $randCode, $randCode),
             new Input("time", "Time:", "1d 4h", "1d 4h"),
             new Input("command", "Commands {player}", "command1;command2;command3"),
-            new Toggle("inventory", "Inventory"),
+            new Toggle("inventory", "Inventory", false),
             new Toggle("secret", "Público/Secreto"),
             new Input("maxLimit", "Limite Máximo", "")
         ];

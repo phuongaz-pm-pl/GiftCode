@@ -6,12 +6,15 @@ namespace phuongaz\giftcode\components\form;
 
 use dktapps\pmforms\element\Dropdown;
 use dktapps\pmforms\element\Label;
+use faz\common\Debug;
 use Generator;
 use faz\common\form\AsyncForm;
+use phuongaz\giftcode\components\code\Code;
 use phuongaz\giftcode\components\code\CodePool;
 use phuongaz\giftcode\Loader;
 use pocketmine\player\Player;
 use pocketmine\Server;
+use SOFe\AwaitGenerator\Await;
 
 class Give extends AsyncForm {
 
@@ -43,36 +46,22 @@ class Give extends AsyncForm {
             $data = $giveResponse->getAll();
             $data["code"] = array_values(CodePool::getCodes())[$data["codeIndex"]];
             $data["player"] = array_values(Server::getInstance()->getOnlinePlayers())[$data["player"]];
-            yield $this->executeAction($data);
+
+            yield Loader::getInstance()->getProvider()->awaitPlayerCodes($data["player"], function (array $codes) use ($data) {
+                $this->executeAction($data, $codes);
+            });
         }
     }
 
-    public function executeAction(array $giveData) : Generator {
+    public function executeAction(array $giveData, array $codes) : void {
+        /** @var Code $code */
         $code = $giveData["code"];
         $player = $giveData["player"];
-
         $provider = Loader::getInstance()->getProvider();
         if(!is_null($player)) {
-            $codes = yield from $provider->awaitPlayerCodes($player->getName());
             $codes[] = $code->toArray();
             $player->sendMessage("§aVocê recebeu o código <{$code->getCode()}>");
-            yield $provider->awaitUpdate($player->getName(), $codes);
-            return;
+            Await::g2c($provider->awaitUpdate($player->getName(), $codes));
         }
-
-//        if($giveData["all"]) {
-//            $amount = yield Await::promise(function(Closure $resolve) use ($provider, $code) {
-//                $giveFunc = function (string $playerName) use ($provider, $code) {
-//                    $codes = yield from $provider->awaitPlayerCodes($playerName);
-//                    $codes[] = $code->toArray();
-//                    yield $provider->awaitUpdate($playerName, $codes);
-//                };
-//                yield Func::handleWithNamePlayers($giveFunc, fn($amount) => $resolve($amount));
-//            });
-//            yield $this->custom("GiftCodes", [
-//                "§a{$amount} players received code <{$code->getCode()}>"
-//            ]);
-//            yield $this->main();
-//        }
     }
 }

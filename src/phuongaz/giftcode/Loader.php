@@ -47,7 +47,7 @@ class Loader extends PluginBase
         $this->codesConfig->reload();
         $codes = $this->codesConfig->getAll();
         foreach($codes as $code => $data)  {
-            $code = Code::fromConfig($code, $data);
+            $code = Code::fromConfig((string)$code, $data);
             CodePool::addCode($code);
             $this->getLogger()->info("Loaded code " . $code->getCode() . " with " . count($code->getItems()) . " items and " . count($code->getCommands()) . " commands");
         }

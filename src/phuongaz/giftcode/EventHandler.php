@@ -45,10 +45,11 @@ class EventHandler implements Listener {
             }
         }
         $console = new ConsoleCommandSender(Server::getInstance(), Server::getInstance()->getLanguage());
-        foreach($commands as $command){
-            $player->getServer()->dispatchCommand($console, str_replace("{player}", $player->getName(), $command));
+        if(count($commands) > 0) {
+            foreach($commands as $command){
+                $player->getServer()->dispatchCommand($console, str_replace("{player}", $player->getName(), $command));
+            }
         }
-
         if($code->isLimit()) {
             $code->setLimitUsed($code->getLimitUsed() + 1);
             $code->save();

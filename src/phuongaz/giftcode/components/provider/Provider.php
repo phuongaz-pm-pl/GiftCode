@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace phuongaz\giftcode\components\provider;
 
 use Closure;
-use faz\common\Debug;
 use Generator;
 use phuongaz\giftcode\components\code\Code;
 use pocketmine\player\Player;
@@ -43,12 +42,20 @@ class Provider{
         $rows = yield from $this->dataConnector->asyncSelect(self::SELECT_DATA, [
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player
         ]);
+
         if(empty($rows)){
             yield $this->awaitInsert($player, []);
+
+            if (!is_null($onSuccess)) {
+                $onSuccess([]);
+            }
+
             return [];
         }
+
         $codes = json_decode($rows[0]["code"], true);
-        if ($onSuccess !== null) {
+
+        if (!is_null($onSuccess)) {
             $onSuccess($codes);
         }
 
@@ -76,10 +83,17 @@ class Provider{
     }
 
     public function awaitUpdate(Player|string $player, array $codes, ?array $usedCodes = null) : Generator{
+
+        if(is_null($usedCodes)) {
+            return yield $this->awaitUsedCodes($player, function(array $usedCodes) use ($codes, $player) {
+                Await::g2c($this->awaitUpdate($player, $codes, $usedCodes));
+            });
+        }
+
         yield $this->dataConnector->asyncChange(self::UPDATE_DATA, [
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player,
             "code" => json_encode($codes),
-            "used_code" => json_encode($usedCodes ?? [])
+            "used_code" => json_encode($usedCodes)
         ]);
     }
 }
