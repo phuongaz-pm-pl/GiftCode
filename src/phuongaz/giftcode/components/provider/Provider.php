@@ -56,7 +56,6 @@ class Provider{
         }
 
         $codes = json_decode($rows[0]["code"], true);
-        Debug::dump($codes);
         if (!is_null($onSuccess)) {
             $onSuccess($codes);
         }

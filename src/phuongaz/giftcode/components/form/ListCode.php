@@ -6,6 +6,7 @@ namespace phuongaz\giftcode\components\form;
 
 use dktapps\pmforms\element\Input;
 use dktapps\pmforms\element\Label;
+use faz\common\Debug;
 use faz\common\form\AsyncForm;
 use Generator;
 use JsonException;
@@ -60,12 +61,20 @@ class ListCode extends AsyncForm {
                 ]);
             }
 
+            if (in_array($code->getCode(), $usedCodes) && !in_array($code->getCode(), array_map(fn($code) => $code->getCode(), $codes))) {
+                yield $this->custom("Giftcode", [
+                    new Label("code", "Você utilizou este código.")
+                ]);
+                return yield from $this->main();
+            }
+
             if(!in_array($code, $codes)) {
                 if(!$code->isSecret()) {
                     if(in_array($code->getCode(), $usedCodes)) {
                         yield $this->custom("Giftcode", [
                             new Label("code", "Você utilizou este código.")
                         ]);
+                        Debug::dump("1 used");
                         return yield from $this->main();
                     }
                 }else{
@@ -73,13 +82,6 @@ class ListCode extends AsyncForm {
                         new Label("code", "O código não existe")
                     ]);
                 }
-            }
-
-            if(in_array($code->getCode(), $usedCodes) and !in_array($code->getCode(), $codes)) {
-                yield $this->custom("Giftcode", [
-                    new Label("code", "Você utilizou este código.")
-                ]);
-                return yield from $this->main();
             }
 
             $usedCodes[] = $code->getCode();

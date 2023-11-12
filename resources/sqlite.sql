@@ -2,7 +2,7 @@
 -- #{ table
 -- #    { init
 CREATE TABLE IF NOT EXISTS giftcode (
-      player_name TEXT,
+      player_name TEXT UNIQUE,
       code TEXT,
       used_code TEXT
 );
