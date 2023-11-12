@@ -28,7 +28,7 @@ class Provider{
 
     public function awaitInsert(Player|string $player, array $codes, ?Closure $closure = null) :Generator {
         yield $this->dataConnector->asyncInsert(self::INSERT_DATA, [
-            "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player,
+            "player_name" => $player instanceof Player ? $player->getName() : $player,
             "code" => json_encode($codes),
             "used_code" => json_encode([])
         ]);
@@ -45,7 +45,7 @@ class Provider{
      */
     public function awaitPlayerCodes(Player|string $player, ?Closure $onSuccess = null): Generator {
         $rows = yield from $this->dataConnector->asyncSelect(self::SELECT_DATA, [
-            "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player
+            "player_name" => $player instanceof Player ? $player->getName() : $player
         ]);
 
         if (!empty($rows)) {
@@ -76,7 +76,7 @@ class Provider{
      */
     public function awaitUsedCodes(Player|string $player, Closure $onSuccess = null) : Generator{
         $rows = yield from $this->dataConnector->asyncSelect(self::SELECT_DATA, [
-            "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player
+            "player_name" => $player instanceof Player ? $player->getName() : $player
         ]);
         if(empty($rows)){
             return [];
@@ -98,7 +98,7 @@ class Provider{
         }
 
         yield $this->dataConnector->asyncChange(self::UPDATE_DATA, [
-            "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player,
+            "player_name" => $player instanceof Player ? $player->getName() : $player,
             "code" => json_encode($codes),
             "used_code" => json_encode($usedCodes)
         ]);
