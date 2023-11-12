@@ -74,7 +74,6 @@ class ListCode extends AsyncForm {
                         yield $this->custom("Giftcode", [
                             new Label("code", "Você utilizou este código.")
                         ]);
-                        Debug::dump("1 used");
                         return yield from $this->main();
                     }
                 }else{

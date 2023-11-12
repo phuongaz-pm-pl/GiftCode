@@ -43,25 +43,31 @@ class Provider{
      * @param Closure|null $onSusses
      * @return Generator<Code[]>
      */
-    public function awaitPlayerCodes(Player|string $player, ?Closure $onSuccess = null) : Generator{
+    public function awaitPlayerCodes(Player|string $player, ?Closure $onSuccess = null): Generator {
         $rows = yield from $this->dataConnector->asyncSelect(self::SELECT_DATA, [
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player
         ]);
 
-        if(!isset($rows[0])){
-            if(!is_null($onSuccess)){
-                $onSuccess(null);
-                return [];
+        if (!empty($rows)) {
+            $codes = json_decode($rows[0]["code"], true);
+
+            if (is_array($codes)) {
+                if (!is_null($onSuccess)) {
+                    $onSuccess($codes);
+                }
+
+                return array_map(fn($code) => Code::fromArray($code), $codes);
             }
         }
 
-        $codes = json_decode($rows[0]["code"], true);
         if (!is_null($onSuccess)) {
-            $onSuccess($codes);
+            $onSuccess(null);
         }
 
-        return array_map(fn($code) => Code::fromArray($code), $codes);
+        return [];
     }
+
+
 
     /**
      * @param Player|string $player
