@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace phuongaz\giftcode\components\provider;
 
 use Closure;
+use faz\common\Debug;
 use Generator;
 use phuongaz\giftcode\components\code\Code;
 use pocketmine\player\Player;
@@ -25,12 +26,16 @@ class Provider{
         Await::g2c($dataConnector->asyncGeneric(self::CREATE_TABLE));
     }
 
-    public function awaitInsert(Player|string $player, array $codes) :Generator {
+    public function awaitInsert(Player|string $player, array $codes, ?Closure $closure = null) :Generator {
         yield $this->dataConnector->asyncInsert(self::INSERT_DATA, [
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player,
             "code" => json_encode($codes),
             "used_code" => json_encode([])
         ]);
+
+        if($closure !== null){
+            $closure();
+        }
     }
 
     /**
@@ -54,7 +59,7 @@ class Provider{
         }
 
         $codes = json_decode($rows[0]["code"], true);
-
+        Debug::dump($codes);
         if (!is_null($onSuccess)) {
             $onSuccess($codes);
         }
@@ -86,9 +91,14 @@ class Provider{
 
         if(is_null($usedCodes)) {
             return yield $this->awaitUsedCodes($player, function(array $usedCodes) use ($codes, $player) {
+                Debug::dump("awaitUpdate -- 1");
+                Debug::dump($codes);
                 Await::g2c($this->awaitUpdate($player, $codes, $usedCodes));
             });
         }
+
+        Debug::dump("awaitUpdate -- 2");
+        Debug::dump($codes);
 
         yield $this->dataConnector->asyncChange(self::UPDATE_DATA, [
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player,

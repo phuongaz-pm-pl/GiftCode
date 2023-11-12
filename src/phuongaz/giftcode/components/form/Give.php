@@ -48,20 +48,16 @@ class Give extends AsyncForm {
             $data["player"] = array_values(Server::getInstance()->getOnlinePlayers())[$data["player"]];
 
             yield Loader::getInstance()->getProvider()->awaitPlayerCodes($data["player"], function (array $codes) use ($data) {
-                $this->executeAction($data, $codes);
+                /** @var Code $code */
+                $code = $data["code"];
+                $player = $data["player"];
+                $provider = Loader::getInstance()->getProvider();
+                if(!is_null($player)) {
+                    $codes[] = $code->toArray();
+                    $player->sendMessage("§aVocê recebeu o código <{$code->getCode()}>");
+                    Await::g2c($provider->awaitUpdate($player->getName(), $codes));
+                }
             });
-        }
-    }
-
-    public function executeAction(array $giveData, array $codes) : void {
-        /** @var Code $code */
-        $code = $giveData["code"];
-        $player = $giveData["player"];
-        $provider = Loader::getInstance()->getProvider();
-        if(!is_null($player)) {
-            $codes[] = $code->toArray();
-            $player->sendMessage("§aVocê recebeu o código <{$code->getCode()}>");
-            Await::g2c($provider->awaitUpdate($player->getName(), $codes));
         }
     }
 }

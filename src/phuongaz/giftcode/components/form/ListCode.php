@@ -32,9 +32,11 @@ class ListCode extends AsyncForm {
 
         $elements = [];
         $elements[] = new Input("code_input", "Digite o código", "GC");
+        $index = 0;
         foreach ($codes as $code) {
             $expires = ($code->getTemp() == "null") ? "" : " [Expira: " . $code->getTemp() . "]";
-            $elements[] = new Label("code", $code->getCode() . $expires );
+            $elements[] = new Label("code" . $index, $code->getCode() . $expires );
+            $index++;
         }
 
         $codeResponse = yield from $this->custom(
