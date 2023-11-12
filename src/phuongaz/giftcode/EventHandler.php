@@ -10,10 +10,24 @@ use phuongaz\giftcode\components\event\PlayerUseCodeEvent;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\Server;
 use SOFe\AwaitGenerator\Await;
 
 class EventHandler implements Listener {
+
+    public function onLogin(PlayerLoginEvent $event) : void {
+        $player = $event->getPlayer();
+        Await::f2c(function() use ($player) {
+            $provider = Loader::getInstance()->getProvider();
+            yield $provider->awaitPlayerCodes($player->getName(), function (?array $codes) use ($player) {
+                if(is_null($codes)) {
+                    $provider = Loader::getInstance()->getProvider();
+                    Await::g2c($provider->awaitInsert($player->getName(), []));
+                }
+            });
+        });
+    }
 
     public function onJoin(PlayerJoinEvent $event) : void {
         $player = $event->getPlayer();

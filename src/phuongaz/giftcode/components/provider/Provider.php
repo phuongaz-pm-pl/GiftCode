@@ -48,14 +48,11 @@ class Provider{
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player
         ]);
 
-        if(empty($rows)){
-            yield $this->awaitInsert($player, []);
-
-            if (!is_null($onSuccess)) {
-                $onSuccess([]);
+        if(!isset($rows[0])){
+            if(!is_null($onSuccess)){
+                $onSuccess(null);
+                return [];
             }
-
-            return [];
         }
 
         $codes = json_decode($rows[0]["code"], true);
@@ -91,14 +88,9 @@ class Provider{
 
         if(is_null($usedCodes)) {
             return yield $this->awaitUsedCodes($player, function(array $usedCodes) use ($codes, $player) {
-                Debug::dump("awaitUpdate -- 1");
-                Debug::dump($codes);
                 Await::g2c($this->awaitUpdate($player, $codes, $usedCodes));
             });
         }
-
-        Debug::dump("awaitUpdate -- 2");
-        Debug::dump($codes);
 
         yield $this->dataConnector->asyncChange(self::UPDATE_DATA, [
             "player_name" => $player instanceof Player ? strtolower($player->getName()) : $player,

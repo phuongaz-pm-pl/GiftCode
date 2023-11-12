@@ -75,7 +75,7 @@ class ListCode extends AsyncForm {
                 }
             }
 
-            if(in_array($code->getCode(), $usedCodes)) {
+            if(in_array($code->getCode(), $usedCodes) and !in_array($code->getCode(), $codes)) {
                 yield $this->custom("Giftcode", [
                     new Label("code", "Você utilizou este código.")
                 ]);
