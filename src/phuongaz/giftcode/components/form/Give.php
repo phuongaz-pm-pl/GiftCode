@@ -47,7 +47,11 @@ class Give extends AsyncForm {
             $data["code"] = array_values(CodePool::getCodes())[$data["codeIndex"]];
             $data["player"] = array_values(Server::getInstance()->getOnlinePlayers())[$data["player"]];
 
-            yield Loader::getInstance()->getProvider()->awaitPlayerCodes($data["player"], function (array $codes) use ($data) {
+            yield Loader::getInstance()->getProvider()->awaitPlayerCodes($data["player"], function (?array $codes) use ($data) {
+                if(is_null($codes)) {
+                    $provider = Loader::getInstance()->getProvider();
+                    Await::g2c($provider->awaitInsert($data["player"], []));
+                }
                 /** @var Code $code */
                 $code = $data["code"];
                 $player = $data["player"];
